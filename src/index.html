@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta content="Stoneworks World Map" property="og:title" />
+    <meta content="replacement dynmap for stoneworks, 'f#ck this, ill do it myself'" property="og:description" />
+    <meta content="#43B581" data-react-helmet="true" name="theme-color" />
+    <title>M. A. P. S. - Frontend</title>
+
+    <link rel="stylesheet" href="styles.css">
+
+    <script>
+        var _paq = window._paq = window._paq || [];
+        /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+        _paq.push(['trackPageView']);
+        _paq.push(['enableLinkTracking']);
+        (function() {
+          var u="https://microwavedram.matomo.cloud/";
+          _paq.push(['setTrackerUrl', u+'matomo.php']);
+          _paq.push(['setSiteId', '1']);
+          var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+          g.async=true; g.src='https://cdn.matomo.cloud/microwavedram.matomo.cloud/matomo.js'; s.parentNode.insertBefore(g,s);
+        })();
+      </script>
+</head>
+<body>
+    <div class="container">
+        <canvas id="canvas"></canvas>
+        <div class="crosshair">
+            <p id="crosshair"></p>
+        </div>
+    </div>
+
+    <div class="leftheader">
+        <div class="panel" id="title">
+            <h1>Terradivisa World Map</h1>
+            <p>Version 2.0.1+td / contact @microwavedram</p>
+            <p>Next update: absolutely fucking never</p> <button id="hide_header">Hide</button>
+        </div>
+    </div>
+
+    <div class="rightheader" id="rightheader">
+        <div class="nationsearch panel">
+            <h1 class="nomargin">Nation Search</h1>
+            <p>Search by nation or by player</p>
+            
+            <span>Search: </span> 
+            <input type="text" name="search" id="search">
+            <hr>
+            <button id="unselect">Unfocus Nation</button>
+            <ul id="search_results">
+                
+            </ul>
+        </div>
+        <div id="nation" class="panel">
+            <h1 class="tx-center nomargin">${Nation}</h1>
+    
+            <span>Statistics</span>
+            <button class="collapsible">Show / Hide</button>
+            <div class="stats">
+                <p>Name: ${Nation}</p>
+                <p>Players: ${Players}</p>
+                <p>Chunks: ${Chunks}</p>
+                <p>Balance: ${Balance}</p>
+            </div>
+            
+            <hr>
+
+            <span>Players</span>
+            <button class="collapsible">Show / Hide</button>
+            <table>
+                <tr>
+                    <th>Player</th>
+                    <th>Rank</th>
+                    <th>Tiered</th>
+                </tr>
+            </table>
+            <hr>
+            <button id="teleport">Teleport to claim</button>
+        </div>
+    </div>
+
+    <script src="quadtree.min.js" defer></script>
+    <script src="index.js" defer></script>
+    <script src="nation.js" defer></script>
+    <script src="plugins.js" defer></script>
+    <script src="prevent_zoom.js"></script>
+    <script src="collapse.js"></script>
+</body>
+</html>
