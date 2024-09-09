@@ -10,11 +10,18 @@ const ZOOM_SENS = 0.1
 const loading = new Image()
 loading.src = "assets/loading.png"
 
+const player_marker = new Image()
+player_marker.src = "assets/player.png"
+
 const crosshair = document.getElementById("crosshair")
 const rightheader = document.getElementById("rightheader")
 
 function roundNtoNearestX(n, x) {
 	return Math.round(n / x) * x
+}
+
+function lerp(a, b, t) {
+	return a + (b - a) * t
 }
 
 class Tile {
@@ -64,6 +71,9 @@ class WorldMap {
 		this.tiles = null
 		this.markers = []
 		this.lands = []
+
+		this.players = {}
+		this.player_position_cache = {}
 
 		this.zooming = false
 		this.zoom_1x = 0
@@ -168,6 +178,7 @@ class WorldMap {
 
 		this.setZoomLevel(this.zoom_level)
 		this.#pullResources()
+		this.#fetchPlayers()
 		this.#setupTiles()
 
 		addEventListener("mousedown", (event) => {
@@ -587,6 +598,39 @@ class WorldMap {
 			this.context.stroke()
 		}
 
+		if ("players" in this.players) {
+			this.context.font = "20px Arial"
+			this.context.strokeStyle = `rgba(255,255,255,1)`
+			this.context.fillStyle = `rgba(255,255,255,1)`
+			this.players.players.forEach((player) => {
+				let saved = this.player_position_cache[player.name]
+
+				let x = player.x
+				let z = player.z
+				let yaw = player.yaw
+
+				if (saved) {
+					x = lerp(saved.x, x, 0.05)
+					z = lerp(saved.z, z, 0.05)
+					yaw = lerp(saved.yaw, yaw, 0.05)
+				}
+
+				this.player_position_cache[player.name] = {
+					x: x,
+					z: z,
+					yaw: yaw,
+				}
+
+				this.#drawImage(
+					player_marker,
+					[x, z],
+					[16, 16],
+					(yaw * Math.PI) / 180 + Math.PI
+				)
+				this.#drawText(player.name, [x, z], [10, 4])
+			})
+		}
+
 		requestAnimationFrame(() => this.draw())
 	}
 
@@ -608,16 +652,38 @@ class WorldMap {
 		this.scale_factor = Math.pow(1.1, level / 10)
 	}
 
+	async #fetchPlayers() {
+		const request = await fetch(
+			"http://voice.cloudmc.uk:1234/http://terradivisa.com:8071/tiles/players.json"
+		)
+
+		if (request.status == 200) {
+			this.players = await request.json()
+		}
+
+		setTimeout(() => this.#fetchPlayers(), 0)
+	}
+
 	#setInterpolation(state) {
 		this.context.webkitImageSmoothingEnabled = state
 		this.context.mozImageSmoothingEnabled = state
 		this.context.imageSmoothingEnabled = state
 	}
 
-	#drawImage(image, [wx, wy], [w, h]) {
+	#drawImage(image, [wx, wy], [w, h], a = 0) {
 		const [sx, sy] = this.toScreenSpace([wx, wy])
 
-		this.context.drawImage(image, sx, sy, w, h)
+		this.context.translate(sx, sy)
+		if (a != 0) {
+			this.context.rotate(a)
+		}
+
+		this.context.drawImage(image, -w / 2, -h / 2, w, h)
+
+		if (a != 0) {
+			this.context.rotate(-a)
+		}
+		this.context.translate(-sx, -sy)
 	}
 
 	#drawCircle(radius, [wx, wy]) {
